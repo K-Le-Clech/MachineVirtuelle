@@ -139,7 +139,7 @@ New(Map<String, Expr> initMap)
 allocation of an instance
 ```
 var a = {
-  foo: 4
+  foo: 4,
   bar: 2 + 3
 };
 ```

@@ -133,8 +133,12 @@ public class ASTInterpreter {
         throw new ReturnError(visit(expr, env));
       }
       case If(Expr condition, Block trueBlock, Block falseBlock, int lineNumber) -> {
-				throw new UnsupportedOperationException("TODO If");
-
+				//throw new UnsupportedOperationException("TODO If");
+        var value = visit(condition, env);
+        if(value instanceof Integer i && i == 0){
+          yield visit(falseBlock, env);
+        }
+        yield visit(trueBlock, env);
       }
       case New(Map<String, Expr> initMap, int lineNumber) -> {
 				throw new UnsupportedOperationException("TODO New");

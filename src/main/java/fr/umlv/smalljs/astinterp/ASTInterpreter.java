@@ -19,10 +19,7 @@ import fr.umlv.smalljs.rt.JSObject;
 import fr.umlv.smalljs.rt.JSObject.Invoker;
 
 import java.io.PrintStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static fr.umlv.smalljs.rt.JSObject.UNDEFINED;
 import static java.util.stream.Collectors.joining;
@@ -141,13 +138,50 @@ public class ASTInterpreter {
         yield visit(trueBlock, env);
       }
       case New(Map<String, Expr> initMap, int lineNumber) -> {
-				throw new UnsupportedOperationException("TODO New");
+				//throw new UnsupportedOperationException("TODO New");
+        var fieldNewObject = new HashMap<String, Object>();
+        initMap.entrySet().stream().forEach(e -> fieldNewObject.put(e.getKey(), visit(e.getValue(), env)));
+
+        yield new Object() {
+          public final HashMap<String, Object> fields = fieldNewObject;
+
+          @Override
+          public String toString() {
+            var sb = new StringBuilder();
+            sb.append("{ // object\n");
+            for(var e: fields.entrySet()) {
+              sb.append("  ").append(e.getKey()).append(": ").append(e.getValue()).append("\n");
+            }
+            sb.append("  proto: null\n}");
+            return sb.toString();
+          }
+        };
       }
       case FieldAccess(Expr receiver, String name, int lineNumber) -> {
-        throw new UnsupportedOperationException("TODO FieldAccess");
+        //throw new UnsupportedOperationException("TODO FieldAccess");
+        var object = visit(receiver, env);
+        var cls = object.getClass();
+        try {
+          var fields = (HashMap<String, Object>) cls.getDeclaredField("fields").get(object);
+          yield fields.getOrDefault(name, "undefined");
+        } catch (NoSuchFieldException e) {
+          throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+          throw new RuntimeException(e);
+        }
       }
       case FieldAssignment(Expr receiver, String name, Expr expr, int lineNumber) -> {
-        throw new UnsupportedOperationException("TODO FieldAssignment");
+        //throw new UnsupportedOperationException("TODO FieldAssignment");
+        var object = visit(receiver, env);
+        var cls = object.getClass();
+        try {
+          var fields = (HashMap<String, Object>) cls.getDeclaredField("fields").get(object);
+          yield fields.put(name, visit(expr, env));
+        } catch (NoSuchFieldException e) {
+          throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+          throw new RuntimeException(e);
+        }
       }
       case MethodCall(Expr receiver, String name, List<Expr> args, int lineNumber) -> {
         throw new UnsupportedOperationException("TODO MethodCall");

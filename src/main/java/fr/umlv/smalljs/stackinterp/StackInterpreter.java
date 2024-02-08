@@ -120,15 +120,16 @@ public class StackInterpreter {
 					//dumpStack("in lookup", stack, sp, bp, dict, heap);
 				}
 				case Instructions.REGISTER -> {
-					throw new UnsupportedOperationException("TODO REGISTER");
+					//throw new UnsupportedOperationException("TODO REGISTER");
 					// find the current instruction
-					//int indexTagValue = ...
+					int indexTagValue = instrs[pc++];
 					// decode the name from the instructions
-					//String name = ...
+					String name = (String) decodeDictObject(indexTagValue, dict);
 					// pop the value from the stack and decode it
-					//Object value = ...
+					var elem = pop(stack, --sp);
+					Object value = decodeDictObject(elem, dict);
 					// register it in the global environment
-					// globalEnv.register(...);
+					globalEnv.register(name, value);
 				}
 				case Instructions.LOAD -> {
 					//throw new UnsupportedOperationException("TODO LOAD");
@@ -220,40 +221,40 @@ public class StackInterpreter {
 					push(stack, sp++, result);
 					continue;
 					}
-					throw new UnsupportedOperationException("TODO FUNCALL");
+					//throw new UnsupportedOperationException("TODO FUNCALL");
 
-					// initialize new code
-					//code = (Code) maybeCode;
-
-					// check number of arguments
-					//if (code.parameterCount() != argumentCount + 1/* this */) {
-					//	throw new Failure("wrong number of arguments for " + newFunction.getName() + " expected "
-					//			+ (code.parameterCount() - 1) + " but was " + argumentCount);
-					//}
-
-					// save bp/pc/code in activation zone
-					// stack[activation + offset] = ??
-					//var activation = ...;
-					//stack[activation + BP_OFFSET] = ...;
-					//stack[activation + PC_OFFSET] = ...;
-					//stack[activation + FUN_OFFSET] = ...;
-
-					// initialize pc, bp and sp
-					//pc = ...
-					//bp = ...
-					//sp = ...
-
-					// initialize all locals that are not parameters
-					//for (var i = bp + code.parameterCount(); i < bp + code.slotCount(); i++) {
-					//	stack[i] = undefined;
-					//}
-
-					// initialize function and instrs of the new function
-					//function = newFunction;
-					//instrs = code.instrs();
-
-					// DEBUG
-					// dumpStack(">end funcall dump", stack, sp, bp, dict, heap);
+//					// initialize new code
+//					code = (Code) maybeCode;
+//
+//					// check number of arguments
+//					if (code.parameterCount() != argumentCount + 1/* this */) {
+//						throw new Failure("wrong number of arguments for " + newFunction.getName() + " expected "
+//								+ (code.parameterCount() - 1) + " but was " + argumentCount);
+//					}
+//
+//					// save bp/pc/code in activation zone
+//					// stack[activation + offset] = ??
+//					var activation = bp;
+//					stack[activation + BP_OFFSET] = bp;
+//					stack[activation + PC_OFFSET] = pc;
+//					//stack[activation + FUN_OFFSET] = code;
+//
+//					// initialize pc, bp and sp
+//					pc = 0; // instruction pointer
+//					bp = 0; // base pointer
+//					sp = bp + code.slotCount() + ACTIVATION_SIZE; // stack pointer
+//
+//					// initialize all locals that are not parameters
+//					for (var i = bp + code.parameterCount(); i < bp + code.slotCount(); i++) {
+//						stack[i] = undefined;
+//					}
+//
+//					// initialize function and instrs of the new function
+//					function = newFunction;
+//					instrs = code.instrs();
+//
+//					// DEBUG
+//					dumpStack(">end funcall dump", stack, sp, bp, dict, heap);
 				}
 				case Instructions.RET -> {
 					//throw new UnsupportedOperationException("TODO RET");

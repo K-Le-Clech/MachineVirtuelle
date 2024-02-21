@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import fr.umlv.smalljs.rt.Failure;
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.ConstantDynamic;
@@ -210,11 +211,18 @@ public class ByteCodeRewriter {
             mv.visitInvokeDynamicInsn(name, desc, BSM_FUNCALL);
         }
         case LocalVarAssignment(String name, Expr expr, boolean declaration, int lineNumber) -> {
-          throw new UnsupportedOperationException("TODO LocalVarAssignment");
+          //throw new UnsupportedOperationException("TODO LocalVarAssignment");
           // visit the expression
+            visit(expr, env, mv, dictionary);
           // lookup that name in the environment
-          // if it does not exist throw a Failure
+            var slotOrUndefined = env.lookup(name);
+            if(slotOrUndefined == JSObject.UNDEFINED){
+                // if it does not exist throw a Failure
+                throw new Failure("Failure at line " + lineNumber);
+            }
           // otherwise STORE the top of the stack at the local variable slot
+              mv.visitVarInsn(ASTORE, (int) slotOrUndefined);
+
         }
         case LocalVarAccess(String name, int lineNumber) -> {
           //throw new UnsupportedOperationException("TODO LocalVarAccess");
@@ -234,10 +242,14 @@ public class ByteCodeRewriter {
           Optional<String> optName = fun.optName();
           List<String> parameters = fun.parameters();
           Block body = fun.body();
-          throw new UnsupportedOperationException("TODO Fun");
+          //throw new UnsupportedOperationException("TODO Fun");
           // register the fun inside the fun directory and get the corresponding id
+            var id = dictionary.register(fun);
           // emit a LDC to load the function corresponding to the id at runtime
+            mv.visitVarInsn(ALOAD, id);
           // generate an invokedynamic doing a register with the function name
+            mv.visitInvokeDynamicInsn("register", "()Ljava/lang/Object;", BSM_REGISTER, optName.get());
+
         }
         case Return(Expr expr, int lineNumber) -> {
           // throw new UnsupportedOperationException("TODO Return");

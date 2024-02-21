@@ -89,12 +89,15 @@ public class RT {
   }
 
   public static CallSite bsm_register(Lookup lookup, String name, MethodType type, String functionName) {
-    throw new UnsupportedOperationException("TODO bsm_register");
-    //var classLoader = (FunClassLoader) lookup.lookupClass().getClassLoader();
-    //var globalEnv = classLoader.getGlobal();
+    //throw new UnsupportedOperationException("TODO bsm_register");
+    var classLoader = (FunClassLoader) lookup.lookupClass().getClassLoader();
+    var globalEnv = classLoader.getGlobal();
     //get the REGISTER method handle
+    MethodHandle target = REGISTER;
     // use the global environment as first argument and the functionName as second argument
+    target = MethodHandles.insertArguments(target, 0, globalEnv, functionName);
     // create a constant callsite
+    return new ConstantCallSite(target);
   }
 
   @SuppressWarnings("unused")  // used by a method handle

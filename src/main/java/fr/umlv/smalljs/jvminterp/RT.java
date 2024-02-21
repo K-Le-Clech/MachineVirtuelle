@@ -47,22 +47,37 @@ public class RT {
   }
 
   public static CallSite bsm_funcall(Lookup lookup, String name, MethodType type) {
-    throw new UnsupportedOperationException("TODO bsm_funcall");
+    //throw new UnsupportedOperationException("TODO bsm_funcall");
     // take GET_MH method handle
     // make it accept an Object (not a JSObject) as first parameter
     // create a generic invoker (MethodHandles.invoker()) on the parameter types without the qualifier
     // drop the qualifier
     // use MethopdHandles.foldArguments with GET_MH as combiner
     // create a constant callsite
+    //throw new UnsupportedOperationException("TODO bsm_funcall");
+    MethodHandle combiner = GET_MH;
+
+    combiner = combiner.asType(MethodType.methodType(MethodHandle.class, Object.class));
+
+    var invoker = MethodHandles.invoker(type.dropParameterTypes(0, 1));
+
+    invoker = MethodHandles.dropArguments(invoker, 1, Object.class);
+
+    var target = MethodHandles.foldArguments(invoker, combiner);
+
+    return new ConstantCallSite(target);
   }
 
   public static CallSite bsm_lookup(Lookup lookup, String name, MethodType type, String functionName) {
-    throw new UnsupportedOperationException("TODO bsm_lookup");
-    //var classLoader = (FunClassLoader) lookup.lookupClass().getClassLoader();
-    //var globalEnv = classLoader.getGlobal();
-    // get the LOOKUP method handle
-    // use the global environment as first argument and the functionName as second argument
-    // create a constant callsite
+    //throw new UnsupportedOperationException("TODO bsm_lookup");
+    var classLoader = (FunClassLoader) lookup.lookupClass().getClassLoader();
+    var globalEnv = classLoader.getGlobal();
+    //get the LOOKUP method handle
+    MethodHandle target = LOOKUP;
+    //use the global environment as first argument and the functionName as second argument
+    target = MethodHandles.insertArguments(target, 0, globalEnv, functionName);
+    //create a constant callsite
+    return new ConstantCallSite(target);
   }
 
   public static Object bsm_fun(Lookup lookup, String name, Class<?> type, int funId) {

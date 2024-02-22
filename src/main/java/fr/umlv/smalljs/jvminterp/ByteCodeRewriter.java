@@ -218,9 +218,9 @@ public class ByteCodeRewriter {
             var slotOrUndefined = env.lookup(name);
             if(slotOrUndefined == JSObject.UNDEFINED){
                 // if it does not exist throw a Failure
-                throw new Failure("Failure at line " + lineNumber);
+                throw new Failure("unknown local variable " + name + " at " + lineNumber);
             }
-          // otherwise STORE the top of the stack at the local variable slot
+          // otherwise ASTORE the top of the stack at the local variable slot
               mv.visitVarInsn(ASTORE, (int) slotOrUndefined);
 
         }
@@ -246,29 +246,57 @@ public class ByteCodeRewriter {
           // register the fun inside the fun directory and get the corresponding id
             var id = dictionary.register(fun);
           // emit a LDC to load the function corresponding to the id at runtime
-            mv.visitVarInsn(ALOAD, id);
+            mv.visitLdcInsn(new ConstantDynamic(optName.orElse("lambda"), "Ljava/lang/Object;", BSM_FUN, id));
           // generate an invokedynamic doing a register with the function name
-            mv.visitInvokeDynamicInsn("register", "()Ljava/lang/Object;", BSM_REGISTER, optName.get());
+            optName.ifPresent(name -> {
+                mv.visitInsn(DUP);
+                mv.visitInvokeDynamicInsn("register", "(Ljava/lang/Object;)V", BSM_REGISTER, name);
+            });
 
         }
         case Return(Expr expr, int lineNumber) -> {
-          // throw new UnsupportedOperationException("TODO Return");
-          // visit the return expression
-          // generate the bytecode
+            //throw new UnsupportedOperationException("TODO Return");
+            // visit the return expression
+            visit(expr, env, mv, dictionary);
+            // generate the bytecode
+            mv.visitInsn(ARETURN);
         }
         case If(Expr condition, Block trueBlock, Block falseBlock, int lineNumber) -> {
-          throw new UnsupportedOperationException("TODO If");
+          //throw new UnsupportedOperationException("TODO If");
           // visit the condition
+            visit(condition, env, mv, dictionary);
           // generate an invokedynamic to transform an Object to a boolean using BSM_TRUTH
+            mv.visitInvokeDynamicInsn("truth", "(Ljava/lang/Object;)Z", BSM_TRUTH);
+            var falseLabel = new Label();
+            mv.visitJumpInsn(IFEQ, falseLabel);
           // visit the true block
+            visit(trueBlock, env, mv, dictionary);
+            var endLabel = new Label();
+            mv.visitJumpInsn(GOTO, endLabel);
           // visit the false block
+            mv.visitLabel(falseLabel);
+            visit(falseBlock, env, mv, dictionary);
+            mv.visitLabel(endLabel);
         }
         case New(Map<String, Expr> initMap, int lineNumber) -> {
-          throw new UnsupportedOperationException("TODO New");
+          //throw new UnsupportedOperationException("TODO New");
           // call newObject with an INVOKESTATIC
+            mv.visitInsn(ACONST_NULL);
+            mv.visitMethodInsn(INVOKESTATIC, JSOBJECT, "newObject", "(L" + JSOBJECT + ";)L" + JSOBJECT + ";", false);
           // for each initialization expression
-            // generate a string with the key
-            // call register on the JSObject
+            initMap.forEach((key, expr) -> {
+                mv.visitInsn(DUP);
+                // generate a string with the key
+                mv.visitLdcInsn(key);
+
+                //visit
+                visit(expr, env, mv, dictionary);
+
+                // call register on the JSObject
+                mv.visitMethodInsn(INVOKEVIRTUAL, JSOBJECT, "register", "(Ljava/lang/String;Ljava/lang/Object;)V", false);
+
+            });
+
         }
         case FieldAccess(Expr receiver, String name, int lineNumber) -> {
           throw new UnsupportedOperationException("TODO FieldAccess");

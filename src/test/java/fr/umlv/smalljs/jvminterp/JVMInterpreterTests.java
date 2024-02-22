@@ -54,12 +54,12 @@ public class JVMInterpreterTests {
     assertEquals("6\n", execute("print(3 * 2)\n"));
     assertEquals("1\n", execute("print(3 / 2)\n"));
   }
-  
+
   @Tag("Q7") @Test
   public void printPrint3() {
     assertEquals("3\nundefined\n", execute("print(print(3))\n"));
   }
-  
+
   @Tag("Q8") @Test
   public void printAVariable() {
     assertEquals("3\n", execute("""
@@ -92,12 +92,12 @@ public class JVMInterpreterTests {
             print('hello', me);
             """));
   }
-  
+
   @Tag("Q9") @Test
   public void printAVariableDefinedAfter() {
     assertEquals("undefined\n", execute("print(a);\nvar a = 2;\n"));
   }
-  
+
   @Tag("Q10") @Test
   public void callAUserDefinedFunctionAndPrint() {
     assertEquals("3\n", execute("""
@@ -288,7 +288,7 @@ public class JVMInterpreterTests {
               proto: null
             }
             """,
-        execute("""
+            execute("""
                 var o = {
                     x: 1,
                     y: 2
@@ -306,7 +306,7 @@ public class JVMInterpreterTests {
               proto: null
             }
             """,
-        execute("""
+            execute("""
                 var a = 1;
                 var o = {
                   x: a,
@@ -318,19 +318,19 @@ public class JVMInterpreterTests {
   @Tag("Q14") @Test
   public void createAnObjectEvaluationOrder() {
     assertEquals(
-        "a\nb\n",
-        execute("""
+            "a\nb\n",
+            execute("""
                 var foo = {
                   a: print('a'),
                   b: print('b')
                 };"""));
   }
-  
+
   @Tag("Q15") @Test
   public void objectGetAFieldValue() {
     assertEquals(
-        "John\n",
-        execute("""
+            "John\n",
+            execute("""
                 var john = { name: "John" };
                 print(john.name);
                 """));
@@ -338,8 +338,8 @@ public class JVMInterpreterTests {
   @Tag("Q15") @Test
   public void objectGetAFieldNoValue() {
     assertEquals(
-        "undefined\n",
-        execute("""
+            "undefined\n",
+            execute("""
                 var john = { name: "John" };
                 print(john.foo);
                 """));
@@ -365,8 +365,8 @@ public class JVMInterpreterTests {
   @Tag("Q16") @Test
   public void objectGetAndSetAField() {
     assertEquals(
-        "2\n9\n",
-        execute("""
+            "2\n9\n",
+            execute("""
                 function f(o) { return o.field; }
                 var obj = { field: 2 };
                 print(f(obj));
@@ -374,12 +374,12 @@ public class JVMInterpreterTests {
                 print(f(obj));
                 """));
   }
-  
+
   @Tag("Q17") @Test
   public void objectCallAMethod() {
     assertEquals(
-        "hello 42\nhello 42\n",
-        execute("""
+            "hello 42\nhello 42\n",
+            execute("""
                 var object = {
                   bar: "hello",
                   foo: function(x) {
@@ -393,8 +393,8 @@ public class JVMInterpreterTests {
   @Tag("Q17") @Test
   public void objectCallAMethodTwice() {
     assertEquals(
-        "3\n3\n",
-        execute("""
+            "3\n3\n",
+            execute("""
                 function fun(o) {
                   return o.field;
                 }
